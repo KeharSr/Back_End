@@ -52,7 +52,7 @@ const createUser = async (req, res) => {
         // Database Fields : Client's Value
         firstName : firstName,
         lastName : lastName,
-        email : email,
+        email :  email,
         password : hasedPassword
     })
 
