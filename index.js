@@ -7,6 +7,7 @@ const connectDatabase = require('./database/database');
 const dotenv = require('dotenv');
 const cors = require('cors')
 const { options } = require('./routes/userRoutes');
+const acceptFormData = require('express-fileupload')
 
 //Creating an express app
  const app = express();
@@ -22,6 +23,14 @@ const { options } = require('./routes/userRoutes');
 
  // Express Json Configure
  app.use(express.json())
+
+ //Express Form Configure
+ app.use(acceptFormData())
+
+
+ app.use(express.static("./public"))
+
+
 
  //dotenv Configuration
  dotenv.config()
@@ -50,6 +59,10 @@ app.get('/test',(req,res)=>{
 // configuring Routes of User
 
 app.use('/api/user', require('./routes/userRoutes'))
+
+app.use('/api/product', require('./routes/productRoutes'))
+
+
 
 // http://localhost:5000/api/user/create 
 
