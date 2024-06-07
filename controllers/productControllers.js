@@ -1,5 +1,6 @@
 const path = require('path');
 const productModel = require('../models/productModel');
+const fs = require('fs');  //fs=file system
  
  
 const createProduct = async (req, res) => {
@@ -149,6 +150,79 @@ const deleteProduct = async (req, res) => {
     }
 }
  
+
+// update product
+
+// 1. get product id (URL)
+// 2. if image:
+// 3. New image should be upload
+// 4. Old image should  be delete
+// 5. Find product (database) productImage
+// 6. find that image in directory
+// 7. delete that image
+// 8. update the product
+
+
+const updateProduct = async (req, res) => {
+    try{
+        // if there is image
+        if(req.files && req.files.productImage){
+            //destructing
+            const {productImage} = req.files;
+
+            //upload image to directory(/public/products folder)
+            const imageName = `${Date.now()}-${productImage.name}`;
+ 
+            //2. make an upload path (/path/upload- directory)
+           const imageUploadPath = path.join(__dirname, `../public/products/${imageName}`)
+
+              //move the folder
+            await productImage.mv(imageUploadPath)
+
+            //req.params(id), rq.body(updated data +pn,pp,pc,pd), req.files(image)
+            //add new field to the req.body(productImage->imageName)
+            req.body.productImage = imageName; //image uploaded (generated name)
+
+            // if image is uploaded, and req.body is assigned
+            if(req.body.productImage){
+                //find the product
+                const existingProduct = await productModel.findById(req.params.id)
+
+                //Searching in the directory folder
+                const oldImagePath = path.join(__dirname, `../public/products/${existingProduct.productImage}`)
+
+                // delete from file system
+                fs.unlinkSync(oldImagePath)
+            }
+
+            
+        }
+        //update the data
+        const updateProduct = await productModel.findByIdAndUpdate(req.params.id, req.body)
+        res.status(200).json({
+            success: true,
+            message: "Product updated successfully",
+            data: updateProduct
+        })
+
+
+
+        
+
+    }catch(error){
+        console.log(error)
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error
+        })
+    
+    }
+
+}
+
+
+
  
  
  
@@ -156,5 +230,6 @@ module.exports = {
     createProduct,
     getAllProducts,
     getSingleProduct,
-    deleteProduct
+    deleteProduct,
+    updateProduct
 };
